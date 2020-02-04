@@ -61,6 +61,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.Phased;
 import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.gemfire.config.annotation.PeerCacheConfigurer;
 import org.springframework.data.gemfire.support.AbstractFactoryBeanSupport;
@@ -584,7 +585,13 @@ public class CacheFactoryBean extends AbstractFactoryBeanSupport<GemFireCache>
 					type, Arrays.toString(JndiDataSourceType.values())));
 
 			jndiDataSource.getAttributes().put("type", jndiDataSourceType.getName());
-			JNDIInvoker.mapDatasource(jndiDataSource.getAttributes(), jndiDataSource.getProps());
+
+                        try {
+			    JNDIInvoker.mapDatasource(jndiDataSource.getAttributes(), jndiDataSource.getProps());
+                        }
+                        catch (Exception cause) {
+                            throw new InvalidDataAccessApiUsageException("Failed to run operation", cause);
+                        }
 		});
 
 		return cache;
